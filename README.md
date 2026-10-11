@@ -1,153 +1,152 @@
-# CallMateAI — Personal AI Call Assistant for Everyone
+# CallMateAI — Unified Application Monorepo
 
-[![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-6.2.0-646CFF.svg)](https://vitejs.dev/)
-[![Three.js](https://img.shields.io/badge/Three.js-R3F-black.svg)](https://docs.pmnd.rs/react-three-fiber)
-[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v3.4-38bdf8.svg)](https://tailwindcss.com/)
-
-> **"Every Call Matters. Every Connection Counts."**  
-> A personal AI call assistant web application that helps people manage incoming calls, prioritize conversations, handle routine inquiries, and identify calls requiring immediate human handover.
+Welcome to the **CallMateAI** unified monorepo repository. This repository organizes the full-stack architecture into dedicated sub-projects for the FastAPI backend engine and the React + Vite frontend application.
 
 ---
 
-## 🌟 Visual Reference Alignment
+## 📁 Repository Structure
 
-- **Primary Reference (Image 1)**:
-  - Deep midnight navy (`#050811`, `#090e1a`) and cosmic aurora gradients
-  - Adorable, futuristic 3D Robot mascot with pearl-white chassis, glowing headphones, neon blue visor eyes, and rotating holographic pedestal
-  - Floating holographic incoming call cards, audio frequency visualizers, and speech bubbles
-  - 6 compact glowing feature cards: AI Call Handling, Smart Prioritization, Caller Information, Important Call Alerts, Human Handover, Call History
-  - 4-step "How It Works" workflow and live interactive scroll storytelling
-  - Comprehensive dashboard preview with live metrics and weekly activity chart
-
-- **Secondary Reference (Image 2)**:
-  - Two-column **Sign-In page** (`/login`) with welcoming 3D robot, normalized email validation, and remember-me session persistence
-  - Two-column **Registration page** (`/register`) with live password checklist and strict `@gmail.com` domain enforcement
-  - High-clarity **Dashboard layout** (`/dashboard`) featuring dark sidebar, topbar search, notifications popover, 4 stat cards, recent calls, priority alerts, and Recharts analytics
+```
+callmateai/
+├── backend/                     # FastAPI, PyMongo, MongoDB Atlas Backend Engine
+│   ├── app/
+│   │   ├── main.py              # FastAPI entrypoint with CORS (http://localhost:5173)
+│   │   ├── schemas.py           # Pydantic data models & request/response contracts
+│   │   ├── routers/
+│   │   │   ├── calls.py         # Call lifecycle, agent forwarding, transcripts
+│   │   │   ├── emergencies.py   # Incident triage & counselor alert actions
+│   │   │   └── students.py      # Student profile & attendance queries
+│   │   └── services/            # Call lifecycle & keyword emergency detection
+│   ├── .env                     # MongoDB Atlas / local connection URI
+│   ├── .env.example             # Template for MongoDB Atlas deployment
+│   ├── crud.py                  # PyMongo data access layer & dual-escalation alerts
+│   ├── database.py              # PyMongo connection pooling & index provisioning
+│   ├── seed.py                  # Seeder: 5 counselors & 250 students (embedded parents)
+│   ├── requirements.txt         # Python dependencies (FastAPI, PyMongo, Uvicorn, etc.)
+│   ├── test_database.py         # Stage 3 database & dual-alert test suite
+│   └── verify_backend.py        # Stage 2 call state machine & emergency verification
+│
+├── frontend/                    # Modern React 18, Vite, Tailwind CSS Web Application
+│   ├── src/
+│   │   ├── api.js               # Unified API client using VITE_API_BASE_URL
+│   │   ├── App.jsx              # React Router client routes & navigation tree
+│   │   ├── main.jsx             # React DOM entrypoint
+│   │   ├── components/          # Reusable UI components & dialogs
+│   │   ├── context/             # AuthContext, ThemeContext
+│   │   ├── layouts/             # DashboardLayout with sidebar & header
+│   │   ├── pages/               # Dashboard, CallCenter, PriorityAlerts, Directory
+│   │   └── utils/               # Storage, crypto, and form validation utilities
+│   ├── .env.development         # VITE_API_BASE_URL="http://127.0.0.1:8000"
+│   ├── index.html               # Single-page application entrypoint
+│   ├── package.json             # NPM dependencies & scripts
+│   ├── tailwind.config.js       # Tailwind CSS styling tokens
+│   └── vite.config.js           # Vite dev server configuration (Port 5173)
+│
+└── README.md                    # Root project guide & execution instructions
+```
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Quickstart Guide
 
 ### 1. Prerequisites
-- **Node.js**: v18.0.0 or higher
-- **npm**: v9.0.0 or higher
+- **Python**: 3.10+ (tested on Python 3.13)
+- **Node.js**: 18+ (with `npm`)
+- **MongoDB**: Local MongoDB instance (`mongodb://127.0.0.1:27017/`) or a free [MongoDB Atlas](https://www.mongodb.com/atlas) cloud cluster.
 
-### 2. Install Dependencies
-Dependencies are already installed in this directory. If running in a fresh clone:
+---
+
+### 2. Backend Setup & Startup
+
+#### Step 2.1: Open terminal in `callmateai/backend`
+```bash
+cd callmateai/backend
+```
+
+#### Step 2.2: Configure Environment Variables
+Copy `.env.example` to `.env` (or configure with your MongoDB Atlas connection string):
+```bash
+# In callmateai/backend/.env:
+MONGO_URI="mongodb://127.0.0.1:27017/"
+# Or for MongoDB Atlas Cloud:
+# MONGO_URI="mongodb+srv://<username>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority&appName=CallMateAI"
+DB_NAME="callmate_db"
+```
+
+#### Step 2.3: Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+#### Step 2.4: Seed the 5 Counselors & 250 Students
+```bash
+python seed.py
+```
+
+#### Step 2.5: Verify Database & Backend Architecture
+```bash
+# Verify MongoDB Atlas Stage 3 Database & Dual-Alerts:
+python test_database.py
+
+# Verify FastAPI call lifecycle & emergency keyword routing:
+python verify_backend.py
+```
+
+#### Step 2.6: Launch the FastAPI Backend Server
+```bash
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+- **Backend API**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- **Interactive Swagger Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **Health Endpoint**: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
+
+---
+
+### 3. Frontend Setup & Startup
+
+#### Step 3.1: Open terminal in `callmateai/frontend`
+```bash
+cd callmateai/frontend
+```
+
+#### Step 3.2: Verify Local Development Environment
+Ensure `.env.development` exists:
+```bash
+# callmateai/frontend/.env.development
+VITE_API_BASE_URL="http://127.0.0.1:8000"
+```
+
+#### Step 3.3: Install Frontend Dependencies
 ```bash
 npm install
 ```
 
-### 3. Launch Development Server
+#### Step 3.4: Start Vite Development Server
 ```bash
 npm run dev
 ```
-Open your browser at `http://localhost:5173`.
+- **Frontend Web UI**: [http://localhost:5173](http://localhost:5173)
 
-### 4. Build for Production
+---
+
+## 🔄 Cross-Origin Resource Sharing (CORS) & Networking
+
+The backend in `app/main.py` explicitly whitelists the Vite development origins:
+- `http://localhost:5173`
+- `http://127.0.0.1:5173`
+
+The frontend module `src/api.js` automatically routes all API requests (telephony calls, student lookups, emergency triage, and counselor alert management) to `http://127.0.0.1:8000`.
+
+---
+
+## 🧪 Automated Verification Suite
+
+Run all verification tests from the backend directory:
 ```bash
-npm run build
-npm run preview
+cd callmateai/backend
+python test_database.py
+python verify_backend.py
 ```
-
----
-
-## 🔐 Demo Credentials
-
-You can sign in immediately using the pre-seeded demo account:
-
-| Field | Demo Credential |
-| :--- | :--- |
-| **Email** | `thanu@gmail.com` |
-| **Password** | `CallMate@123` |
-
-You can also click the **⚡ Auto-fill Demo** button on the `/login` page, or create your own custom demo account on the `/register` page.
-
----
-
-## 📋 Form Validation Rules
-
-### Email Validation
-- Leading and trailing whitespace is automatically trimmed.
-- The address is converted to lowercase before validation and storage.
-- The domain **must strictly be `gmail.com`** (e.g., `thanu@gmail.com` is accepted; Yahoo, Outlook, and malformed subdomains like `user@gmail.com.co` are rejected).
-
-### Password Validation
-- At least 8 characters
-- At least one lowercase letter (`[a-z]`)
-- At least one uppercase letter (`[A-Z]`)
-- At least one special character (`[!@#$%^&*...]`)
-- Live checklist updates in real-time as you type
-- Passwords must match exactly before the submission button is enabled
-
----
-
-## 🛠️ Architecture & Technology Stack
-
-- **Framework**: React 18 + Vite
-- **Routing**: React Router DOM v7 (Public and Protected route guards)
-- **3D Graphics**: Three.js + React Three Fiber (`@react-three/fiber`) + Drei (`@react-three/drei`)
-- **Animation**: Framer Motion for scroll-triggered interactive storytelling
-- **Icons**: Lucide React
-- **Data Visualization**: Recharts (Weekly Call Activity BarChart & Call Outcomes Donut)
-- **Styling**: Tailwind CSS + Custom CSS tokens in `src/index.css` (Glassmorphism, Neon Glows)
-- **Security / Storage**: Browser `localStorage` with versioned keys (`callmate_v1_...`), safe JSON parsing, and client-side SHA-256 password hashing
-
----
-
-## 📁 Project Structure
-
-```
-CallMateAI/
-├── public/
-├── src/
-│   ├── components/
-│   │   ├── FeatureCard.jsx       # 6 compact glass cards (Image 1)
-│   │   ├── Modal.jsx             # Accessible backdrop dialogs
-│   │   ├── Navbar.jsx            # Desktop & responsive mobile navigation
-│   │   ├── ProtectedRoute.jsx    # Session auth route guards
-│   │   ├── Robot3D.jsx           # 3D R3F Robot mascot with fallback
-│   │   ├── ScrollStory.jsx       # Scroll-triggered 5-step call story
-│   │   ├── Sidebar.jsx           # Dark dashboard sidebar navigation
-│   │   ├── StatCard.jsx          # 4 metric cards (Image 1 & 2)
-│   │   ├── Toast.jsx             # Floating animated notifications
-│   │   └── Topbar.jsx            # Search, notifications drawer & profile
-│   ├── context/
-│   │   └── AuthContext.jsx       # Session state, login, register, toasts
-│   ├── data/
-│   │   └── sampleData.js         # Universal sample calls, callers, alerts
-│   ├── layouts/
-│   │   └── DashboardLayout.jsx   # Master layout for all dashboard pages
-│   ├── pages/
-│   │   ├── CallCenter.jsx        # Simulated incoming calls & AI transcript
-│   │   ├── CallerDirectory.jsx   # Searchable callers list & directives
-│   │   ├── CallHistory.jsx       # Calls archive with full transcripts
-│   │   ├── Dashboard.jsx         # Main overview with Recharts analytics
-│   │   ├── Landing.jsx           # High-impact landing page (Image 1)
-│   │   ├── Login.jsx             # 2-column sign-in page (Image 2)
-│   │   ├── PriorityAlerts.jsx    # Urgent alerts with acknowledge/escalate
-│   │   ├── Register.jsx          # Live checklist registration (Image 2)
-│   │   └── Settings.jsx          # Preferences, themes & demo data reset
-│   ├── utils/
-│   │   ├── crypto.js             # SHA-256 client password hashing
-│   │   ├── storage.js            # Versioned localStorage data manager
-│   │   └── validation.js         # Strict gmail and password regex rules
-│   ├── App.jsx                   # Central route tree
-│   ├── index.css                 # Custom design tokens & animations
-│   └── main.jsx                  # React DOM root entry
-├── index.html
-├── package.json
-├── tailwind.config.js
-└── vite.config.js
-```
-
----
-
-## ⚠️ Demo-Only Notice & Limitations
-
-This application is an **advanced frontend prototype**:
-- **Simulated Telephone Calls**: Does not connect to real telecom networks (PSTN/VoIP). Incoming calls, durations, transcripts, and handovers are generated locally for simulation purposes.
-- **Client-Side Storage**: User accounts, session tokens, and call records persist strictly in your browser's `localStorage`.
-- **Google Sign-In**: Clicking the Google button displays a clear informational dialog explaining that production Google OAuth requires backend identity provider configuration.
-- **Data Reset**: You can restore the original sample records at any time from **Settings &rarr; Reset Demo Data**.
+Expected output:
+- `🎉 ALL 250 STUDENTS & 5 COUNSELORS VERIFIED ON MONGODB ATLAS!`
+- `ALL VERIFICATION TESTS PASSED SUCCESSFULLY! ✅`
