@@ -1,0 +1,460 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   CALLMATEAI — GLOBAL DESIGN SYSTEM & STYLESHEET
+   Midnight navy, electric blue/violet gradients, glassmorphism, glowing rings
+   ========================================================================== */
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', var(--font-sans);
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Color Tokens */
+  --bg-deep: #050811;
+  --bg-midnight: #090e1a;
+  --bg-charcoal: #0f172a;
+  --bg-card: rgba(15, 23, 42, 0.65);
+  --bg-card-hover: rgba(22, 33, 62, 0.75);
+  --bg-glass-elevated: rgba(24, 32, 56, 0.85);
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(99, 102, 241, 0.35);
+  --border-cyan: rgba(56, 189, 248, 0.4);
+
+  --accent-cyan: #38bdf8;
+  --accent-blue: #2563eb;
+  --accent-indigo: #6366f1;
+  --accent-violet: #8b5cf6;
+  --accent-purple: #a855f7;
+  --accent-magenta: #ec4899;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-sans);
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--bg-deep);
+  background-image: 
+    radial-gradient(ellipse 90% 80% at 50% -20%, rgba(99, 102, 241, 0.18), transparent 70%),
+    radial-gradient(circle 800px at 90% 20%, rgba(139, 92, 246, 0.12), transparent 70%),
+    radial-gradient(circle 700px at 10% 60%, rgba(56, 189, 248, 0.08), transparent 70%),
+    radial-gradient(ellipse 100% 60% at 50% 120%, rgba(168, 85, 247, 0.15), transparent 70%);
+  background-attachment: fixed;
+  color: var(--text-main);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #090e1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+  border: 2px solid #090e1a;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Typography Helpers */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: rgba(13, 19, 36, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  border-radius: 16px;
+}
+
+.glass-card {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border-radius: 16px;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background: rgba(22, 33, 62, 0.78);
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45), 0 0 20px -5px rgba(99, 102, 241, 0.2);
+  transform: translateY(-2px);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+
+/* Gradients */
+.gradient-text {
+  background: linear-gradient(135deg, #ffffff 10%, #c7d2fe 50%, #93c5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-vivid {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #a855f7 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+  transition: all 0.25s ease;
+}
+
+.gradient-btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #9333ea 100%);
+  box-shadow: 0 6px 28px rgba(124, 58, 237, 0.55);
+  transform: translateY(-1px);
+}
+
+.gradient-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f1f5f9;
+  transition: all 0.2s ease;
+}
+
+.gradient-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Glow Elements */
+.glow-cyan {
+  box-shadow: 0 0 25px -4px rgba(56, 189, 248, 0.4);
+}
+
+.glow-indigo {
+  box-shadow: 0 0 25px -4px rgba(99, 102, 241, 0.4);
+}
+
+.glow-purple {
+  box-shadow: 0 0 25px -4px rgba(168, 85, 247, 0.4);
+}
+
+/* Hologram Speech Card */
+.holo-bubble {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 8px 32px rgba(6, 182, 212, 0.25);
+  border-radius: 18px;
+}
+
+/* Waveform Bars Animation */
+@keyframes soundwave {
+  0%, 100% { height: 6px; }
+  50% { height: 26px; }
+}
+
+.wave-bar {
+  width: 3px;
+  background: linear-gradient(to top, #38bdf8, #818cf8);
+  border-radius: 9999px;
+  animation: soundwave 1.2s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: floatGentle 4s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.85; }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Input Fields */
+
+.form-input {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  background: rgba(13, 19, 36, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: #6366f1;
+  background: rgba(17, 24, 46, 0.9);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+.form-input::placeholder {
+  color: #64748b;
+}
+
+/* Reserve space for left icons and right password toggles */
+.form-input.pl-12 {
+  padding-left: 3rem;
+}
+
+.form-input.pr-12 {
+  padding-right: 3rem;
+}
+
+
+/* Priority Badges */
+.badge-high {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-medium {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-low {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.badge-resolved {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Status Badges */
+.badge-important {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.badge-business {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge-general {
+  background: rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* ==========================================================================
+   LIGHT MODE DESIGN TOKENS & OVERRIDES
+   ========================================================================== */
+
+html.light,
+body.theme-light,
+[data-theme="light"] {
+  --bg-deep: #f8fafc;
+  --bg-midnight: #f1f5f9;
+  --bg-charcoal: #e2e8f0;
+  --bg-card: rgba(255, 255, 255, 0.94);
+  --bg-card-hover: #ffffff;
+  --bg-glass-elevated: #ffffff;
+
+  --border-subtle: rgba(15, 23, 42, 0.1);
+  --border-glow: rgba(99, 102, 241, 0.25);
+  --border-cyan: rgba(14, 165, 233, 0.35);
+
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #64748b;
+}
+
+html.light body,
+body.theme-light {
+  background-color: #f8fafc !important;
+  background-image: 
+    radial-gradient(ellipse 90% 80% at 50% -20%, rgba(99, 102, 241, 0.08), transparent 70%),
+    radial-gradient(circle 800px at 90% 20%, rgba(139, 92, 246, 0.06), transparent 70%),
+    radial-gradient(circle 700px at 10% 60%, rgba(56, 189, 248, 0.06), transparent 70%),
+    radial-gradient(ellipse 100% 60% at 50% 120%, rgba(168, 85, 247, 0.07), transparent 70%) !important;
+  color: #0f172a !important;
+}
+
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light h5,
+html.light h6 {
+  color: #0f172a;
+}
+
+html.light .glass-panel {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.07) !important;
+  color: #0f172a !important;
+}
+
+html.light .glass-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+html.light .glass-card:hover {
+  background: #ffffff !important;
+  border-color: rgba(99, 102, 241, 0.45) !important;
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.12) !important;
+}
+
+html.light .form-input {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light .form-input:focus {
+  background: #ffffff !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+}
+
+html.light .form-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+html.light .bg-slate-950,
+html.light .bg-slate-900,
+html.light .bg-slate-950\/85,
+html.light .bg-slate-950\/95,
+html.light .bg-slate-950\/70 {
+  background-color: #ffffff !important;
+}
+
+html.light .bg-slate-900\/60,
+html.light .bg-slate-900\/70,
+html.light .bg-slate-900\/80 {
+  background-color: #f8fafc !important;
+}
+
+html.light .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+
+html.light .bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.07) !important;
+}
+
+html.light .hover\:bg-white\/5:hover {
+  background-color: rgba(15, 23, 42, 0.06) !important;
+}
+
+html.light .hover\:bg-white\/10:hover {
+  background-color: rgba(15, 23, 42, 0.09) !important;
+}
+
+html.light .border-white\/10,
+html.light .border-white\/5 {
+  border-color: rgba(203, 213, 225, 0.8) !important;
+}
+
+html.light .text-slate-100,
+html.light .text-slate-200 {
+  color: #1e293b !important;
+}
+
+html.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+html.light .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.light .text-white {
+  color: #0f172a !important;
+}
+
+html.light .hover\:text-white:hover {
+  color: #0f172a !important;
+}
+
+/* Ensure vibrant colored buttons, badges & links keep pure white text */
+html.light .gradient-btn-primary,
+html.light .gradient-btn-primary *,
+html.light button[class*="bg-indigo-6"],
+html.light button[class*="bg-indigo-6"] *,
+html.light button[class*="bg-blue-6"],
+html.light button[class*="bg-blue-6"] *,
+html.light button[class*="bg-rose-5"],
+html.light button[class*="bg-rose-5"] *,
+html.light button[class*="bg-rose-6"],
+html.light button[class*="bg-rose-6"] *,
+html.light button[class*="bg-emerald-6"],
+html.light button[class*="bg-emerald-6"] *,
+html.light button[class*="bg-emerald-5"],
+html.light button[class*="bg-emerald-5"] *,
+html.light [class*="bg-gradient-to-r"][class*="text-white"],
+html.light .text-white-fixed {
+  color: #ffffff !important;
+}
+
