@@ -126,8 +126,17 @@ class CallSessionResponse(BaseModel):
         default_factory=list,
         description="Chronological log of messages and events"
     )
+    reply: Optional[str] = Field(
+        default=None,
+        description="Spoken text response returned by AI agent"
+    )
+    intent: Optional[str] = Field(
+        default=None,
+        description="Detected intent of the message"
+    )
 
     model_config = ConfigDict(
+        extra="allow",
         json_schema_extra={
             "example": {
                 "call_id": 1,
@@ -159,8 +168,15 @@ class StudentRecord(BaseModel):
     remarks: str
     fee_status: str
     emergency_contact: str
+    student_id: Optional[int] = None
+    student_code: Optional[str] = None
+    section: Optional[str] = None
+    counselor_id: Optional[int] = None
+    attendance_pct: Optional[str] = None
+    current_status: Optional[str] = None
+    parents: Optional[List[Dict[str, Any]]] = None
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
 
 
 class CounselorRecord(BaseModel):

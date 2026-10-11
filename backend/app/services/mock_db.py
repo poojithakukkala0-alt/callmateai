@@ -112,23 +112,107 @@ def reset_mock_db() -> None:
 
 
 def get_student(student_id: int) -> Optional[Dict[str, Any]]:
-    """Retrieve student dictionary by ID."""
+    """Retrieve student dictionary by ID (with MongoDB Atlas integration)."""
     with DB_LOCK:
         student = STUDENTS_DB.get(student_id)
-        return dict(student) if student else None
+        if student:
+            return dict(student)
+
+    # Check MongoDB Atlas
+    try:
+        from database import get_database
+        db = get_database()
+        s = db.students.find_one({"student_id": student_id}, {"_id": 0})
+        if s:
+            parent = s.get("parents", [{}])[0] if s.get("parents") else {}
+            return {
+                "id": s.get("student_id"),
+                "student_id": s.get("student_id"),
+                "student_code": s.get("student_code"),
+                "name": s.get("name"),
+                "class": s.get("section", "General"),
+                "section": s.get("section"),
+                "counselor_id": s.get("counselor_id", 1),
+                "parent_name": parent.get("name", "Parent"),
+                "parent_phone": parent.get("phone", "+91 9800000000"),
+                "attendance": f"{s.get('attendance_pct', '90%')} (Present today)",
+                "attendance_pct": s.get("attendance_pct", "90%"),
+                "current_status": s.get("current_status", "In Class"),
+                "remarks": s.get("remarks", "Active coursework progress."),
+                "fee_status": "Paid - Term 2 Cleared",
+                "emergency_contact": f"{parent.get('phone', '')} ({parent.get('relationship', 'Parent')})",
+                "parents": s.get("parents", [])
+            }
+    except Exception:
+        pass
+    return None
 
 
 def list_students() -> List[Dict[str, Any]]:
-    """Return list of all registered student records."""
+    """Return list of all registered student records from MongoDB Atlas and local store."""
+    results = []
+    seen_ids = set()
     with DB_LOCK:
-        return [dict(s) for s in STUDENTS_DB.values()]
+        for s in STUDENTS_DB.values():
+            results.append(dict(s))
+            seen_ids.add(s["id"])
+
+    try:
+        from database import get_database
+        db = get_database()
+        atlas_students = list(db.students.find({}, {"_id": 0}))
+        for s in atlas_students:
+            s_id = s.get("student_id")
+            if s_id not in seen_ids:
+                parent = s.get("parents", [{}])[0] if s.get("parents") else {}
+                results.append({
+                    "id": s_id,
+                    "student_id": s_id,
+                    "student_code": s.get("student_code"),
+                    "name": s.get("name"),
+                    "class": s.get("section", "General"),
+                    "section": s.get("section"),
+                    "counselor_id": s.get("counselor_id", 1),
+                    "parent_name": parent.get("name", "Parent"),
+                    "parent_phone": parent.get("phone", "+91 9800000000"),
+                    "attendance": f"{s.get('attendance_pct', '90%')} (Present today)",
+                    "attendance_pct": s.get("attendance_pct", "90%"),
+                    "current_status": s.get("current_status", "In Class"),
+                    "remarks": s.get("remarks", "Active coursework progress."),
+                    "fee_status": "Paid - Term 2 Cleared",
+                    "emergency_contact": f"{parent.get('phone', '')} ({parent.get('relationship', 'Parent')})",
+                    "parents": s.get("parents", [])
+                })
+                seen_ids.add(s_id)
+    except Exception:
+        pass
+    return results
 
 
 def get_counselor(counselor_id: int) -> Optional[Dict[str, Any]]:
-    """Retrieve counselor dictionary by ID."""
+    """Retrieve counselor dictionary by ID (with MongoDB Atlas integration)."""
     with DB_LOCK:
         counselor = COUNSELORS_DB.get(counselor_id)
-        return dict(counselor) if counselor else None
+        if counselor:
+            return dict(counselor)
+
+    try:
+        from database import get_database
+        db = get_database()
+        c = db.counselors.find_one({"counselor_id": counselor_id}, {"_id": 0})
+        if c:
+            return {
+                "id": c.get("counselor_id"),
+                "counselor_id": c.get("counselor_id"),
+                "name": c.get("name"),
+                "assigned_class": c.get("section", "General"),
+                "status": "Available" if c.get("availability") == "available" else "In Class (Busy)",
+                "department": c.get("department"),
+                "phone": c.get("phone")
+            }
+    except Exception:
+        pass
+    return None
 
 
 def list_counselors() -> List[Dict[str, Any]]:

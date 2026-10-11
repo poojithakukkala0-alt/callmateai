@@ -67,7 +67,7 @@ def acknowledge_emergency(emergency_id: int):
     summary="Resolve emergency alert",
     description="Mark an emergency incident as resolved once counselor confirms safety."
 )
-def resolve_emergency(emergency_id: int):
+def resolve_emergency(emergency_id: int, payload: Optional[dict] = None):
     """Mark an emergency incident as resolved."""
     record = emergency_service.resolve_emergency(emergency_id)
     if not record:

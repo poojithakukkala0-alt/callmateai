@@ -201,12 +201,15 @@ def get_call(call_id: int, db: Optional[Database] = None) -> Optional[Dict[str, 
     return database.calls.find_one({"call_id": call_id}, {"_id": 0})
 
 
+get_call_by_id = get_call
+
+
 def update_call_status(
     call_id: int,
     status: str,
     db: Optional[Database] = None
 ) -> Optional[Dict[str, Any]]:
-    """Transition call state ('incoming' -> 'agent' -> 'handover' -> 'completed' -> 'failed').
+    """Transition call state ('incoming' -> 'agent' -> 'handover' / 'handover requested' -> 'completed' -> 'failed').
 
     Args:
         call_id: Unique integer call identifier.
@@ -219,7 +222,15 @@ def update_call_status(
     Raises:
         ValueError: If status is not one of the permitted literals.
     """
-    valid_statuses = {"incoming", "agent", "handover", "completed", "failed"}
+    valid_statuses = {
+        "incoming",
+        "agent",
+        "handover",
+        "handover requested",
+        "counselor connected",
+        "completed",
+        "failed"
+    }
     if status not in valid_statuses:
         raise ValueError(
             f"Invalid call status '{status}'. Must be one of {sorted(valid_statuses)}"
