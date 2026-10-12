@@ -1,8 +1,14 @@
+# Python Virtual Environment & Cache
+backend/.venv/
+**/__pycache__/
+*.pyc
+
+# Environment Variables
+# Ignore all sensitive environment files
+backend/.env
+frontend/.env.development
 .env
-.env.*
-!.env.example
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.pytest_cache/
+
+# Frontend Dependencies & Build Output
+frontend/node_modules/
+frontend/dist/
