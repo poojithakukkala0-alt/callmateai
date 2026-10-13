@@ -6,7 +6,11 @@ import Modal from '../components/Modal';
 import { Search, Plus, ChevronRight, Loader2 } from 'lucide-react';
 
 export default function CallerDirectory() {
-  const { showToast } = useAuth();
+  const { user, showToast } = useAuth();
+  const activeCounselorId = Number(user?.counselor_id || user?.counselorId || 1);
+  const activeCounselorName = user?.name || 'Dr. Lakshmi Prasad';
+  const activeCounselorSection = user?.section || 'CSE - Section A';
+
   const [callers, setCallers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -16,21 +20,21 @@ export default function CallerDirectory() {
 
   // New Student & Contact form fields
   const [newStudentName, setNewStudentName] = useState('');
-  const [newSection, setNewSection] = useState('CSE - Section A');
+  const [newSection, setNewSection] = useState(activeCounselorSection);
   const [newParentName, setNewParentName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newPriority, setNewPriority] = useState('Medium');
   const [newNotes, setNewNotes] = useState('');
 
-  // Fetch live students from MongoDB Atlas on mount (Strictly Counselor 1 Scoped)
+  // Fetch live students from MongoDB Atlas on mount (Dynamic Scoped to Logged-in Counselor)
   const loadDirectoryData = () => {
     setLoading(true);
     fetchStudents()
       .then((studentsData) => {
         if (Array.isArray(studentsData) && studentsData.length > 0) {
-          // Strictly filter to logged-in Counselor 1 (Dr. Lakshmi Prasad)
+          // Strictly filter to logged-in Counselor
           const counselorStudents = studentsData.filter(
-            (s) => s.counselor_id === 1 || s.counselorId === 1
+            (s) => Number(s.counselor_id || s.counselorId) === activeCounselorId
           );
 
           // Read in-place call completion updates from localStorage
@@ -67,12 +71,12 @@ export default function CallerDirectory() {
               name: primaryParent.name ? `${primaryParent.name} (${primaryParent.relationship || 'Guardian'})` : s.name,
               parentName: primaryParent.name || 'Primary Guardian',
               phone: primaryParent.phone,
-              category: s.section ? (String(s.section).toLowerCase().includes('section') ? s.section : `Section ${s.section}`) : 'CSE - Section A',
+              category: s.section ? (String(s.section).toLowerCase().includes('section') ? s.section : `Section ${s.section}`) : activeCounselorSection,
               priority,
               attendancePct: typeof attendanceRaw === 'number' ? `${attendanceRaw}%` : attendanceRaw,
               currentStatus: s.current_status || 'Enrolled',
-              counselorId: 1,
-              notes: s.remarks || `Student: ${s.name} (${s.student_code || s.id}). Current Status: ${s.current_status || 'Good Standing'}. Attendance: ${attendanceRaw}. Counselor ID: 1.`,
+              counselorId: activeCounselorId,
+              notes: s.remarks || `Student: ${s.name} (${s.student_code || s.id}). Current Status: ${s.current_status || 'Good Standing'}. Attendance: ${attendanceRaw}. Counselor: ${activeCounselorName} (ID: ${activeCounselorId}).`,
               lastCalled,
               totalCalls,
               avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s.name)}`
@@ -103,7 +107,7 @@ export default function CallerDirectory() {
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [user]);
 
   const filteredCallers = callers.filter((c) => {
     const matchesSearch =
@@ -126,10 +130,12 @@ export default function CallerDirectory() {
     try {
       const createdStudent = addStudentContact({
         studentName: newStudentName.trim(),
-        section: newSection.trim() || 'CSE - Section A',
+        section: newSection.trim() || activeCounselorSection,
         parentName: newParentName.trim(),
         phone: newPhone.trim(),
-        notes: newNotes.trim()
+        notes: newNotes.trim(),
+        counselor_id: activeCounselorId,
+        counselor_name: activeCounselorName
       });
 
       const newContact = {
@@ -144,8 +150,8 @@ export default function CallerDirectory() {
         priority: newPriority,
         attendancePct: '88%',
         currentStatus: 'Enrolled',
-        counselorId: 1,
-        notes: newNotes.trim() || `Student: ${createdStudent.name}. Assigned to Dr. Lakshmi Prasad (Counselor 1).`,
+        counselorId: activeCounselorId,
+        notes: newNotes.trim() || `Student: ${createdStudent.name}. Assigned to ${activeCounselorName} (Counselor ${activeCounselorId}).`,
         lastCalled: 'Never',
         totalCalls: 0,
         avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(createdStudent.name)}`
@@ -156,7 +162,7 @@ export default function CallerDirectory() {
       setStorageItem(KEYS.CALLERS, updated);
       setAddModalOpen(false);
       setNewStudentName('');
-      setNewSection('CSE - Section A');
+      setNewSection(activeCounselorSection);
       setNewParentName('');
       setNewPhone('');
       setNewNotes('');
@@ -181,7 +187,7 @@ export default function CallerDirectory() {
             </span>
           </div>
           <p className="text-sm text-slate-400 mt-1">
-            Manage student & parent contacts scoped to Counselor 1 (Dr. Lakshmi Prasad).
+            Manage student & parent contacts scoped to Counselor {activeCounselorId} ({activeCounselorName} · {activeCounselorSection}).
           </p>
         </div>
 

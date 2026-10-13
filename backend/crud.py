@@ -274,6 +274,41 @@ def add_call_message(
     return message_entry
 
 
+def complete_call(
+    call_id: int,
+    summary: Optional[str] = None,
+    risk_level: Optional[str] = None,
+    db: Optional[Database] = None
+) -> Optional[Dict[str, Any]]:
+    """Transition call state to 'completed', record 'ended_at' timestamp, and update summary/risk_level.
+
+    Args:
+        call_id: Unique integer call identifier.
+        summary: Optional summary of the concluded call session.
+        risk_level: Optional risk level assessment ('Low', 'Medium', 'High').
+        db: Optional Database instance.
+
+    Returns:
+        Optional[Dict[str, Any]]: Updated call document without '_id'.
+    """
+    database = _get_db(db)
+    update_fields: Dict[str, Any] = {
+        "status": "completed",
+        "ended_at": _format_iso_now(),
+    }
+    if summary is not None:
+        update_fields["summary"] = summary
+    if risk_level is not None:
+        update_fields["risk_level"] = risk_level
+
+    database.calls.update_one(
+        {"call_id": call_id},
+        {"$set": update_fields},
+        upsert=True
+    )
+    return database.calls.find_one({"call_id": call_id}, {"_id": 0})
+
+
 # =====================================================================
 # Counselor Dual-Escalation Alerts Engine
 # =====================================================================

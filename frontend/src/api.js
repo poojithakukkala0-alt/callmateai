@@ -112,7 +112,7 @@ export async function fetchStudentById(studentId) {
 }
 
 /**
- * Add a new student contact scoped to Counselor 1 (Dr. Lakshmi Prasad).
+ * Add a new student contact scoped to the active counselor.
  * Appends to local storage so directory displays count 51, 52, etc.
  * @param {Object} studentData
  */
@@ -121,14 +121,35 @@ export function addStudentContact(studentData) {
     const customKey = 'callmate_v1_custom_students';
     const custom = JSON.parse(localStorage.getItem(customKey) || '[]');
 
+    let activeCounselor = null;
+    try {
+      activeCounselor = JSON.parse(localStorage.getItem('callmate_current_counselor') || 'null');
+    } catch (_) {}
+
+    const counselorId = Number(
+      studentData.counselor_id ||
+      studentData.counselorId ||
+      activeCounselor?.counselor_id ||
+      1
+    );
+    const counselorName =
+      studentData.counselor_name ||
+      studentData.counselorName ||
+      activeCounselor?.name ||
+      'Dr. Lakshmi Prasad';
+    const defaultSection =
+      studentData.section ||
+      activeCounselor?.section ||
+      'CSE - Section A';
+
     const newStudentId = 2000 + custom.length + 1;
     const newStudent = {
       student_id: newStudentId,
       student_code: `STU-${newStudentId}`,
       name: studentData.studentName || studentData.name,
-      section: studentData.section || 'CSE - Section A',
-      counselor_id: 1,
-      counselor_name: 'Dr. Lakshmi Prasad',
+      section: defaultSection,
+      counselor_id: counselorId,
+      counselor_name: counselorName,
       attendance_pct: studentData.attendance_pct || '88%',
       current_status: 'Good Standing',
       parents: [
@@ -138,7 +159,7 @@ export function addStudentContact(studentData) {
           relationship: 'Parent'
         }
       ],
-      remarks: studentData.notes || 'Counselor enrolled student contact.'
+      remarks: studentData.notes || `Student contact assigned to ${counselorName} (Counselor ${counselorId}).`
     };
 
     custom.push(newStudent);
@@ -276,11 +297,15 @@ export async function requestHandover(callId, reason = 'Counselor takeover accep
  * Conclude and archive a call session.
  * @param {number|string} callId
  */
-export async function completeCall(callId) {
-  return request(`/api/calls/${callId}/complete`, {
+export const completeCall = async (callId) => {
+  const cleanBase = API_BASE_URL.replace(/\/+$/, '');
+  const res = await fetch(`${cleanBase}/api/calls/${callId}/complete`, {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'completed' })
   });
-}
+  return res.json();
+};
 
 // =====================================================================
 // Emergencies & Counselor Alerts API

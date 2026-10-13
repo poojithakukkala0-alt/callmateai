@@ -16,6 +16,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+import { COUNSELORS } from '../data/counselors';
+
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -33,7 +35,7 @@ export default function Login() {
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
   const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false);
 
-  // Requirement 6: Immediately convert email to lowercase as user types, preserving cursor
+  // Immediately convert email to lowercase as user types, preserving cursor
   const handleEmailChange = (e) => {
     const input = e.target;
     const start = input.selectionStart;
@@ -44,7 +46,6 @@ export default function Login() {
     if (emailError) setEmailError('');
     if (formError) setFormError('');
 
-    // Restore cursor position if needed
     requestAnimationFrame(() => {
       if (input && input.setSelectionRange && start !== null) {
         input.setSelectionRange(start, end);
@@ -61,9 +62,10 @@ export default function Login() {
     if (formError) setFormError('');
   };
 
-  const handleFillDemoCreds = () => {
-    setEmail('thanu@gmail.com');
-    setPassword('CallMate@123');
+  // Quick fill helper for designated counselors or demo user
+  const handleFillDemoCreds = (counselorEmail = 'lakshmi.prasad@callmate.edu', demoPass = '123456@Ai') => {
+    setEmail(counselorEmail);
+    setPassword(demoPass);
     setEmailError('');
     setFormError('');
   };
@@ -171,19 +173,47 @@ export default function Login() {
               
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500" />
 
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-2xl font-bold text-white tracking-tight">Sign In</h2>
-                  <p className="text-xs text-slate-400 mt-1">Access your simulated AI call assistant dashboard</p>
+                  <p className="text-xs text-slate-400 mt-1">Access CallMateAI Counselor Portal</p>
                 </div>
                 <button
                   type="button"
-                  onClick={handleFillDemoCreds}
+                  onClick={() => handleFillDemoCreds('lakshmi.prasad@callmate.edu', '123456@Ai')}
                   className="text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-2.5 py-1 rounded-lg border border-cyan-500/20 transition-colors"
-                  title="Fill demo credentials: thanu@gmail.com / CallMate@123"
+                  title="Fill Dr. Lakshmi Prasad credentials"
                 >
                   ⚡ Auto-fill Demo
                 </button>
+              </div>
+
+              {/* Quick Counselor Pills */}
+              <div className="mb-5 p-2.5 rounded-2xl bg-slate-900/80 border border-white/10">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center justify-between">
+                  <span>Quick Counselor Logins (Password: 123456@Ai):</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                  {COUNSELORS.map((cns) => {
+                    const isSelected = email === cns.emails[0] || email === cns.emails[1];
+                    return (
+                      <button
+                        key={cns.counselor_id}
+                        type="button"
+                        onClick={() => handleFillDemoCreds(cns.emails[0], '123456@Ai')}
+                        className={`px-2 py-1.5 rounded-xl text-[10px] font-bold text-left border transition-all truncate ${
+                          isSelected
+                            ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
+                            : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                        }`}
+                        title={`${cns.name} (${cns.section}) - ${cns.emails[0]}`}
+                      >
+                        <span className="block truncate">{cns.name}</span>
+                        <span className="block text-[9px] text-slate-500 font-mono truncate">{cns.section}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {formError && (
@@ -207,7 +237,7 @@ export default function Login() {
                       value={email}
                       onChange={handleEmailChange}
                       onBlur={handleEmailBlur}
-                      placeholder="youremail@gmail.com"
+                      placeholder="counselor@callmate.edu or @gmail.com"
                       autoComplete="email"
                       className={`form-input h-12 pl-12 pr-4 ${
                         emailError ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''
@@ -221,7 +251,7 @@ export default function Login() {
                     </p>
                   ) : (
                     <p className="text-[11px] text-slate-500 mt-1">
-                      Must be a valid @gmail.com address (converted to lowercase automatically)
+                      Accepts both @callmate.edu and @gmail.com for all 5 counselors
                     </p>
                   )}
                 </div>
@@ -341,8 +371,8 @@ export default function Login() {
       </main>
 
       {/* Footer Info */}
-      <footer className="py-4 text-center text-xs text-slate-500 relative z-10">
-        Demo Credentials: <span className="text-slate-300 font-mono">thanu@gmail.com</span> / <span className="text-slate-300 font-mono">CallMate@123</span>
+      <footer className="py-4 text-center text-xs text-slate-500 relative z-10 px-4">
+        Default Counselor Passwords: <span className="text-slate-300 font-mono">123456@Ai</span> (Any Counselor @callmate.edu or @gmail.com)
       </footer>
 
       {/* Google Sign-In Informational Modal */}

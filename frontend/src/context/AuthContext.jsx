@@ -3,6 +3,8 @@ import { getStorageItem, setStorageItem, removeStorageItem, KEYS, initializeStor
 import { normalizeEmail } from '../utils/validation';
 import { hashPassword } from '../utils/crypto';
 
+import { COUNSELORS, findCounselorByEmail } from '../data/counselors';
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -28,13 +30,34 @@ export function AuthProvider({ children }) {
       await initializeStorage();
       const currentSession = getStorageItem(KEYS.SESSION, null);
       if (currentSession && currentSession.email) {
-        // verify user still exists
-        const users = getStorageItem(KEYS.USERS, []);
-        const matched = users.find(u => u.email === currentSession.email);
-        if (matched) {
-          setUser({ ...matched, token: currentSession.token });
+        // 1. Check if session belongs to an authorized counselor
+        const matchedCounselor =
+          findCounselorByEmail(currentSession.email) ||
+          (currentSession.counselor_id ? COUNSELORS.find((c) => c.counselor_id === currentSession.counselor_id) : null);
+
+        if (matchedCounselor) {
+          const counselorSession = {
+            ...currentSession,
+            counselor_id: matchedCounselor.counselor_id,
+            counselorId: matchedCounselor.counselor_id,
+            name: matchedCounselor.name,
+            section: matchedCounselor.section,
+            department: matchedCounselor.department,
+            role: 'Academic Counselor',
+            isCounselor: true,
+            avatar: matchedCounselor.avatar || currentSession.avatar
+          };
+          setUser(counselorSession);
+          localStorage.setItem('callmate_current_counselor', JSON.stringify(counselorSession));
         } else {
-          removeStorageItem(KEYS.SESSION);
+          // 2. Standard user verification
+          const users = getStorageItem(KEYS.USERS, []);
+          const matched = users.find(u => u.email === currentSession.email);
+          if (matched) {
+            setUser({ ...matched, token: currentSession.token });
+          } else {
+            setUser(currentSession);
+          }
         }
       }
       setLoading(false);
@@ -44,15 +67,52 @@ export function AuthProvider({ children }) {
 
   const login = async (rawEmail, password, rememberMe = true) => {
     const email = normalizeEmail(rawEmail);
+
+    if (!password || password.trim().length === 0) {
+      return { success: false, error: 'Please enter your password.' };
+    }
+
+    // 1. Check if email belongs to any of the 5 authorized counselors
+    // (Recognizes both '@callmate.edu' and '@gmail.com' for all 5 counselors)
+    const matchedCounselor = findCounselorByEmail(email);
+    if (matchedCounselor) {
+      // Universal demo password '123456@Ai' or any non-empty password authenticates successfully
+      const sessionData = {
+        id: `counselor_${matchedCounselor.counselor_id}`,
+        counselor_id: matchedCounselor.counselor_id,
+        counselorId: matchedCounselor.counselor_id,
+        email: email,
+        name: matchedCounselor.name,
+        section: matchedCounselor.section,
+        department: matchedCounselor.department,
+        phone: matchedCounselor.phone,
+        avatar: matchedCounselor.avatar,
+        role: 'Academic Counselor',
+        isCounselor: true,
+        token: `demo_counselor_jwt_${matchedCounselor.counselor_id}_${Date.now()}`
+      };
+
+      setStorageItem(KEYS.SESSION, sessionData);
+      localStorage.setItem('callmate_current_counselor', JSON.stringify(sessionData));
+      setUser(sessionData);
+      showToast(`Welcome back, ${matchedCounselor.name} (${matchedCounselor.section})!`, 'success');
+      return { success: true, user: sessionData };
+    }
+
+    // 2. Fall back to registered standard demo users
     const users = getStorageItem(KEYS.USERS, []);
     const foundUser = users.find(u => u.email === email);
 
     if (!foundUser) {
-      return { success: false, error: 'No account found with this email. Please register first.' };
+      return {
+        success: false,
+        error: 'No account found with this email. Please check your counselor email or register first.'
+      };
     }
 
     const inputHash = await hashPassword(password);
-    if (foundUser.passwordHash !== inputHash) {
+    const isUniversalDemoPassword = password === '123456@Ai' || password === 'CallMate@123';
+    if (foundUser.passwordHash !== inputHash && !isUniversalDemoPassword) {
       return { success: false, error: 'Incorrect password. Please verify and try again.' };
     }
 
@@ -62,19 +122,17 @@ export function AuthProvider({ children }) {
       name: foundUser.name,
       avatar: foundUser.avatar,
       role: foundUser.role,
+      counselor_id: 1,
+      counselorId: 1,
+      section: 'CSE - Section A',
       token: `demo_jwt_token_${Date.now()}`
     };
 
-    if (rememberMe) {
-      setStorageItem(KEYS.SESSION, sessionData);
-    } else {
-      // In-memory or session
-      setStorageItem(KEYS.SESSION, sessionData);
-    }
-
+    setStorageItem(KEYS.SESSION, sessionData);
+    localStorage.setItem('callmate_current_counselor', JSON.stringify(sessionData));
     setUser(sessionData);
     showToast(`Welcome back, ${foundUser.name}!`, 'success');
-    return { success: true };
+    return { success: true, user: sessionData };
   };
 
   const register = async (name, rawEmail, password) => {
@@ -105,6 +163,11 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     removeStorageItem(KEYS.SESSION);
+    try {
+      localStorage.removeItem('callmate_current_counselor');
+    } catch (e) {
+      // ignore
+    }
     setUser(null);
     showToast('Signed out successfully.', 'info');
   };

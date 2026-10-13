@@ -99,13 +99,17 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    const storedCalls = getStorageItem(KEYS.CALLS, []);
-    const storedAlerts = getStorageItem(KEYS.ALERTS, []);
+    const rawCalls = getStorageItem('callmate_calls', null) || getStorageItem(KEYS.CALLS, []);
+    const counselorId = Number(user?.counselor_id || 1);
+    const counselorCalls = Array.isArray(rawCalls)
+      ? rawCalls.filter((c) => !c.counselor_id || Number(c.counselor_id) === counselorId)
+      : [];
+    const storedAlerts = getStorageItem('callmate_alerts_pool', null) || getStorageItem(KEYS.ALERTS, []);
     const storedCallers = getStorageItem(KEYS.CALLERS, []);
-    setCalls(storedCalls);
+    setCalls(counselorCalls);
     setAlerts(storedAlerts);
     setCallers(storedCallers);
-  }, []);
+  }, [user]);
 
   const totalCallsCount = calls.length;
   const importantCallsCount = calls.filter((c) => c.status === 'Important').length;
@@ -149,7 +153,7 @@ export default function Dashboard() {
             <span>AI Assistant Active & Listening</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
-            Welcome back, {user?.name || 'Thanu'}!
+            Welcome back, {user?.name || 'Counselor'}!
           </h1>
           <p className="text-sm text-slate-300">
             Overview of calls, counselor availability, and intelligent triage actions.
@@ -208,7 +212,7 @@ export default function Dashboard() {
 
               {/* Current Active Section Badge */}
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyan-300">
-                CSE - Section A
+                {user?.section || 'CSE - Section A'}
               </span>
             </div>
 
@@ -220,7 +224,7 @@ export default function Dashboard() {
               {aiMode === 'Autonomous AI Assistant'
                 ? 'Autonomous AI Assistant is actively intercepting incoming parent calls, answering queries from verified MongoDB Atlas student attendance records, and escalating urgent safety keywords in real time.'
                 : aiMode === 'Supervised Handover Only'
-                ? 'Supervised Handover is active. AI screens caller intent and holds the line until Dr. Lakshmi Prasad reviews and accepts the handover.'
+                ? `Supervised Handover is active. AI screens caller intent and holds the line until ${user?.name || 'the counselor'} reviews and accepts the handover.`
                 : 'AI mode is Off. All incoming parent calls bypass automated reasoning and ring directly on the counselor phone extension.'}
             </p>
 
@@ -244,7 +248,9 @@ export default function Dashboard() {
               <span className="text-white/20">|</span>
               <span className="flex items-center gap-1.5">
                 <span className="text-slate-500">Active Counselor:</span>
-                <strong className="text-white font-medium">Dr. Lakshmi Prasad (ID: 1)</strong>
+                <strong className="text-white font-medium">
+                  {user?.name || 'Dr. Lakshmi Prasad'} (ID: {user?.counselor_id || 1})
+                </strong>
               </span>
             </div>
           </div>

@@ -57,11 +57,11 @@ export function validateEmail(rawEmail) {
     };
   }
 
-  // Domain must be EXACTLY "gmail.com"
-  if (domain !== 'gmail.com') {
+  // Domain must be either "callmate.edu" or "gmail.com"
+  if (domain !== 'callmate.edu' && domain !== 'gmail.com') {
     return {
       isValid: false,
-      error: 'Only Google Mail accounts (@gmail.com) are accepted for CallMateAI demo.',
+      error: 'Only @callmate.edu and @gmail.com accounts are accepted.',
       normalized: email
     };
   }
